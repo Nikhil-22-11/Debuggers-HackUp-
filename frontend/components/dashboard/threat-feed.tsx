@@ -1,141 +1,132 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Shield, ShieldAlert, ShieldCheck, Globe, Clock, Activity, Terminal, AlertTriangle, Fingerprint, Lock, Eye, Ban, CheckCircle2, ChevronRight, MoreHorizontal } from 'lucide-react'
+import { FilterState } from '@/app/page'
 
 interface ThreatEntry {
-  id: number
+  id: string
   ip: string
-  timestamp: string
-  isolationForestScore: number
-  status: 'Allowed' | 'MFA' | 'Blocked'
+  geo: string
+  score: number
+  classification: string
+  subCategory: string
+  action: 'ALLOWED' | 'BLOCKED' | 'MFA'
+  time: string
 }
 
-interface ThreatFeedProps {
-  isUnderAttack?: boolean
-  filters?: { timeRange: string; riskLevel: string; status: string }
-}
+export default function ThreatFeed({ filters, isUnderAttack }: { filters: FilterState, isUnderAttack: boolean }) {
+  const [entries, setEntries] = useState<ThreatEntry[]>([
+    { id: '1', ip: '198.51.100.89', geo: 'Brazil', score: 0.47, classification: 'Bot Pattern', subCategory: 'ACCOUNT TAKEOVER', action: 'MFA', time: '10:40:57 PM' },
+    { id: '2', ip: '198.51.100.89', geo: 'Japan', score: 0.70, classification: 'Bot Pattern', subCategory: 'ACCOUNT TAKEOVER', action: 'MFA', time: '10:40:53 PM' },
+    { id: '3', ip: '10.0.0.42', geo: 'United States', score: 0.55, classification: 'XSS Attempt', subCategory: 'SYSTEM BREACH', action: 'ALLOWED', time: '10:40:49 PM' },
+    { id: '4', ip: '192.168.1.105', geo: 'Brazil', score: 0.49, classification: 'Credential Reuse', subCategory: 'DATA EXFILTRATION', action: 'BLOCKED', time: '10:40:45 PM' },
+    { id: '5', ip: '172.16.0.201', geo: 'Japan', score: 0.68, classification: 'Credential Reuse', subCategory: 'DATA EXFILTRATION', action: 'BLOCKED', time: '10:40:41 PM' },
+    { id: '6', ip: '198.51.100.89', geo: 'Japan', score: 0.85, classification: 'XSS Attempt', subCategory: 'SYSTEM BREACH', action: 'ALLOWED', time: '10:40:37 PM' },
+    { id: '7', ip: '172.16.0.201', geo: 'Japan', score: 0.51, classification: 'Credential Reuse', subCategory: 'INFORMATION LEAK', action: 'ALLOWED', time: '10:40:03 PM' },
+    { id: '8', ip: '198.51.100.89', geo: 'United States', score: 0.59, classification: 'Anomaly', subCategory: 'DATA EXFILTRATION', action: 'BLOCKED', time: '10:39:33 PM' },
+    { id: '9', ip: '172.16.0.201', geo: 'Germany', score: 0.64, classification: 'Anomaly', subCategory: 'DATA EXFILTRATION', action: 'MFA', time: '10:39:03 PM' }
+  ])
 
-const generateThreats = (includeAttackRows: boolean = false): ThreatEntry[] => {
-  const ips = [
-    '192.168.1.105',
-    '10.0.0.42',
-    '203.0.113.156',
-    '198.51.100.89',
-    '172.16.0.201',
-  ]
-
-  const statuses: Array<'Allowed' | 'MFA' | 'Blocked'> = ['Allowed', 'MFA', 'Blocked']
-
-  const threats = Array.from({ length: 8 }, (_, i) => ({
-    id: i,
-    ip: ips[Math.floor(Math.random() * ips.length)],
-    timestamp: new Date(Date.now() - (i + 1) * 30000).toLocaleTimeString(),
-    isolationForestScore: 0.45 + Math.random() * 0.5,
-    status: statuses[Math.floor(Math.random() * statuses.length)] as 'Allowed' | 'MFA' | 'Blocked',
-  }))
-
-  if (includeAttackRows) {
-    const attackIps = ['45.142.182.99', '203.112.45.67', '87.25.198.41']
-    for (let i = 0; i < 3; i++) {
-      threats.unshift({
-        id: Math.random() * 1000000,
-        ip: attackIps[i],
-        timestamp: new Date().toLocaleTimeString(),
-        isolationForestScore: 0.95 + Math.random() * 0.05,
-        status: 'Blocked',
-      })
+  useEffect(() => {
+    if (isUnderAttack) {
+      const newEntry: ThreatEntry = {
+        id: Date.now().toString(),
+        ip: '95.161.212.18',
+        geo: 'Moscow, RU',
+        score: 0.98,
+        classification: 'Bot Pattern',
+        subCategory: 'RDoS_INJECTION',
+        action: 'BLOCKED',
+        time: new Date().toLocaleTimeString()
+      }
+      setEntries(prev => [newEntry, ...prev.slice(0, 15)])
     }
-  }
-
-  return threats
-}
-
-export default function ThreatFeed({ isUnderAttack = false, filters }: ThreatFeedProps) {
-  const [threats, setThreats] = useState<ThreatEntry[]>([])
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    setThreats(generateThreats(isUnderAttack))
-  }, [isUnderAttack, filters])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setThreats(prev => {
-        const ips = ['192.168.1.105', '10.0.0.42', '203.0.113.156', '198.51.100.89', '172.16.0.201']
-        const statuses: Array<'Allowed' | 'MFA' | 'Blocked'> = ['Allowed', 'MFA', 'Blocked']
-        
-        const newThreat: ThreatEntry = {
-          id: Math.random() * 1000000,
-          ip: ips[Math.floor(Math.random() * ips.length)],
-          timestamp: new Date().toLocaleTimeString(),
-          isolationForestScore: isUnderAttack 
-            ? 0.95 + Math.random() * 0.05
-            : 0.45 + Math.random() * 0.5,
-          status: isUnderAttack 
-            ? 'Blocked'
-            : statuses[Math.floor(Math.random() * statuses.length)] as 'Allowed' | 'MFA' | 'Blocked',
-        }
-        return [newThreat, ...prev.slice(0, 7)]
-      })
-    }, 3000)
-
-    return () => clearInterval(interval)
   }, [isUnderAttack])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Allowed':
-        return 'bg-green-50 border-green-200 text-green-700'
-      case 'MFA':
-        return 'bg-amber-50 border-amber-200 text-amber-700'
-      case 'Blocked':
-        return 'bg-red-50 border-red-200 text-red-700'
-      default:
-        return 'bg-gray-100 border-gray-300 text-gray-700'
-    }
-  }
+  const filteredEntries = useMemo(() => {
+    return entries.filter(e => {
+        if (filters.status !== 'All' && e.action !== filters.status.toUpperCase()) return false
+        if (filters.riskLevel !== 'All Levels') {
+            if (filters.riskLevel === 'High' && e.score < 0.7) return false
+            if (filters.riskLevel === 'Medium' && (e.score < 0.4 || e.score > 0.7)) return false
+        }
+        return true
+    })
+  }, [entries, filters])
 
   return (
-    <div className="rounded-xl border border-gray-200 glass-effect p-4 sm:p-6">
-      <div className="space-y-2 sm:space-y-3 max-h-96 sm:max-h-[500px] overflow-y-auto">
-        {threats.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No recent threats detected
+    <Card className="relative overflow-hidden border-none shadow-3xl bg-white dark:bg-slate-900/40 rounded-[3rem] transition-all duration-1000">
+      <CardHeader className="px-10 py-10">
+        <CardTitle className="text-2xl font-black italic tracking-tighter uppercase text-slate-800 dark:text-white">Recent Defensive Actions Feed</CardTitle>
+      </CardHeader>
+      
+      <CardContent className="px-0 pb-12">
+        <ScrollArea className="h-[600px] w-full px-10">
+          <div className="w-full min-w-[800px]">
+             {/* Header Labels */}
+             <div className="grid grid-cols-12 gap-4 pb-6 px-4 border-b border-slate-100 dark:border-white/5 opacity-40">
+                <span className="col-span-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Source/Geo</span>
+                <span className="col-span-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center">Score</span>
+                <span className="col-span-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Classification</span>
+                <span className="col-span-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-right pr-4">Action</span>
+             </div>
+
+             {/* Feed Entries */}
+             <div className="space-y-4 pt-6">
+                {filteredEntries.map((entry) => (
+                    <div key={entry.id} className="grid grid-cols-12 gap-4 items-center px-4 py-4 rounded-[2rem] hover:bg-slate-50 dark:hover:bg-slate-950/40 transition-all group">
+                        
+                        <div className="col-span-4 flex flex-col justify-center">
+                            <span className="text-[15px] font-black text-slate-900 dark:text-white tracking-tight leading-none mb-1">{entry.ip}</span>
+                            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                                {entry.geo} <span className="opacity-40 font-mono ml-2">· {entry.time}</span>
+                            </span>
+                        </div>
+
+                        <div className="col-span-2 flex justify-center">
+                            <span className={`text-[16px] font-black transition-all ${
+                                entry.score > 0.7 ? 'text-red-500' : entry.score > 0.5 ? 'text-amber-500' : 'text-emerald-500'
+                            }`}>
+                                {entry.score.toFixed(2)}
+                            </span>
+                        </div>
+
+                        <div className="col-span-4 flex flex-col justify-center">
+                            {entry.action === 'ALLOWED' ? (
+                                <>
+                                    <span className="text-[13px] font-black text-emerald-600 dark:text-emerald-500 tracking-tight leading-none">Trusted Traffic</span>
+                                    <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-tighter leading-none italic mt-1 font-mono">NODE_SIGNAL_CLEAN</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="text-[13px] font-black text-slate-700 dark:text-slate-300 tracking-tight leading-none mb-1">{entry.classification}</span>
+                                    <span className="text-[10px] font-black text-red-500/80 uppercase tracking-tighter leading-none italic">
+                                        → {entry.subCategory}
+                                    </span>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="col-span-2 flex justify-end pr-4">
+                            <div className={`px-4 py-1.5 rounded-full border-2 text-[10px] font-black tracking-widest uppercase transition-all shadow-sm ${
+                                entry.action === 'BLOCKED' ? 'bg-red-500/10 border-red-500 text-red-500' : 
+                                entry.action === 'ALLOWED' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 
+                                'bg-amber-500/10 border-amber-500 text-amber-500'
+                            }`}>
+                                {entry.action}
+                            </div>
+                        </div>
+
+                    </div>
+                ))}
+             </div>
           </div>
-        ) : (
-          threats.map(threat => (
-            <div 
-              key={threat.id}
-              className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 card-hover transition-all"
-            >
-              <div className="flex-1 min-w-0 mb-2 sm:mb-0">
-                <p className="font-mono text-xs sm:text-sm text-gray-900 truncate">
-                  {threat.ip}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {threat.timestamp}
-                </p>
-              </div>
-              
-              <div className="flex items-center justify-between sm:gap-4 sm:ml-4 sm:flex-shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0">
-                <div className="text-left sm:text-right flex-1 sm:flex-none">
-                  <p className="text-xs sm:text-sm font-bold text-blue-600">
-                    {threat.isolationForestScore.toFixed(2)}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Score
-                  </p>
-                </div>
-                
-                <div className={`px-2 sm:px-3 py-1 rounded-full border font-semibold text-xs whitespace-nowrap ${getStatusColor(threat.status)}`}>
-                  {threat.status}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   )
 }

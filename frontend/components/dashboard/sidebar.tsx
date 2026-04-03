@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Menu, X, LayoutDashboard, BarChart3, AlertTriangle, FileText, Settings } from 'lucide-react'
+import { LayoutDashboard, BarChart3, AlertTriangle, FileText, Settings, Shield, Menu, X, ChevronDown, SlidersHorizontal, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface SidebarProps {
@@ -24,136 +24,98 @@ export default function Sidebar({ activeView, onViewChange, filters, onFilterCha
 
   return (
     <>
-      {/* Mobile Toggle */}
       <Button
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 lg:hidden"
+        className="fixed top-4 left-4 z-[70] lg:hidden w-12 h-12 bg-white dark:bg-slate-900 rounded-xl border-none shadow-xl transition-all active:scale-95"
       >
-        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        {isOpen ? <X className="w-5 h-5 text-slate-600" /> : <Menu className="w-5 h-5 text-slate-600" />}
       </Button>
 
-      {/* Sidebar */}
-      <div className={`fixed lg:relative left-0 top-0 h-screen w-60 sm:w-64 glass-effect border-r border-gray-200 transition-transform duration-300 ${
+      {/* FINSHIELD AI SIDEBAR - BORDERLESS CALIBRATION */}
+      <div className={`fixed lg:relative left-0 top-0 h-screen w-64 transition-all duration-500 ease-in-out border-none ${
         isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      } z-40 overflow-y-auto`}>
-        <div className="p-4 sm:p-6">
-          <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6 sm:mb-8">AABE</h1>
-          
-          {/* Navigation */}
-          <nav className="space-y-2 mb-8">
-            {menuItems.map(item => {
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    onViewChange(item.id)
-                    setIsOpen(false)
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
-                    activeView === item.id
-                      ? 'bg-primary text-white'
-                      : 'text-sidebar-foreground hover:bg-gray-200'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-sm font-medium">{item.label}</span>
-                </button>
-              )
-            })}
-          </nav>
-
-          {/* Filters Section */}
-          <div className="border-t border-sidebar-border pt-6">
-            <h3 className="text-xs font-semibold text-sidebar-foreground uppercase mb-4">Filters</h3>
-            
-            <div className="space-y-4">
-              {/* Time Range */}
-              <div>
-                <label className="block text-xs font-medium text-sidebar-foreground mb-2">
-                  Time Range
-                </label>
-                <select 
-                  value={filters?.timeRange || 'Last 24 Hours'}
-                  onChange={(e) => onFilterChange?.({ timeRange: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-sidebar-border rounded-lg bg-white text-foreground"
-                >
-                  <option>Last 1 Hour</option>
-                  <option>Last 24 Hours</option>
-                  <option>Last 7 Days</option>
-                  <option>Last 30 Days</option>
-                </select>
-              </div>
-
-              {/* Risk Level */}
-              <div>
-                <label className="block text-xs font-medium text-sidebar-foreground mb-2">
-                  Risk Level
-                </label>
-                <select 
-                  value={filters?.riskLevel || 'All Levels'}
-                  onChange={(e) => onFilterChange?.({ riskLevel: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-sidebar-border rounded-lg bg-white text-foreground"
-                >
-                  <option>All Levels</option>
-                  <option>Critical</option>
-                  <option>High</option>
-                  <option>Medium</option>
-                  <option>Low</option>
-                </select>
-              </div>
-
-              {/* Status Filter */}
-              <div>
-                <label className="block text-xs font-medium text-sidebar-foreground mb-2">
-                  Status
-                </label>
-                <select 
-                  value={filters?.status || 'All'}
-                  onChange={(e) => onFilterChange?.({ status: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-sidebar-border rounded-lg bg-white text-foreground"
-                >
-                  <option>All</option>
-                  <option>Blocked</option>
-                  <option>MFA Triggered</option>
-                  <option>CAPTCHA</option>
-                  <option>Allowed</option>
-                </select>
-              </div>
+      } z-[60] bg-[#f8fafc] dark:bg-[#0B0F19]/98 flex flex-col font-sans overflow-hidden`}>
+        
+        {/* LOGO - AS PER SCREENSHOT */}
+        <div className="p-10 pb-12 flex items-center gap-4">
+            <div className="p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-blue-500/5">
+                <Shield className="w-6 h-6 text-blue-600" />
             </div>
-          </div>
-
-          {/* Chart Options */}
-          <div className="border-t border-sidebar-border pt-6 mt-6">
-            <h3 className="text-xs font-semibold text-sidebar-foreground uppercase mb-4">Chart View</h3>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="w-4 h-4" />
-                <span className="text-sm text-sidebar-foreground">Traffic Heatmap</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="w-4 h-4" />
-                <span className="text-sm text-sidebar-foreground">Mitigation Funnel</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="w-4 h-4" />
-                <span className="text-sm text-sidebar-foreground">Risk Scatter</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="w-4 h-4" />
-                <span className="text-sm text-sidebar-foreground">Threat Waterfall</span>
-              </label>
+            <div className="flex flex-col gap-0.5">
+                <h1 className="text-[20px] font-black italic tracking-tighter text-blue-600 dark:text-blue-400">FinShield AI</h1>
+                <span className="text-[9px] font-black uppercase text-slate-300 dark:text-slate-700 tracking-[0.4em] leading-none">Security_Core</span>
             </div>
-          </div>
+        </div>
+
+        {/* NAVIGATION - AS PER SCREENSHOT */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-12 scrollbar-none">
+            <nav className="space-y-1">
+                {menuItems.map(item => {
+                    const Icon = item.icon
+                    const isSelected = activeView === item.id
+                    return (
+                        <button
+                            key={item.id}
+                            onClick={() => {
+                                onViewChange(item.id)
+                                setIsOpen(false)
+                            }}
+                            className={`w-full group flex items-center gap-5 px-6 py-4 rounded-2xl transition-all duration-300 ${
+                                isSelected 
+                                ? 'bg-blue-600 text-white shadow-[0_20px_40px_rgba(37,99,235,0.2)]' 
+                                : 'text-slate-400 dark:text-slate-600 hover:bg-white dark:hover:bg-slate-900/50 hover:text-slate-950 dark:hover:text-white'
+                            }`}
+                        >
+                            <Icon className={`w-4.5 h-4.5 ${isSelected ? 'text-white' : 'text-slate-300 group-hover:text-blue-600 transition-colors'}`} />
+                            <span className="text-[13px] font-black uppercase tracking-widest leading-none">{item.label}</span>
+                        </button>
+                    )
+                })}
+            </nav>
+
+            {/* FILTERS - SCREENSHOT PERFECT DROPDOWNS */}
+            <div className="pt-10 border-t border-slate-100 dark:border-slate-900 space-y-8">
+                <div className="flex items-center gap-2 px-4 opacity-40">
+                    <SlidersHorizontal className="w-3 h-3 text-slate-400" />
+                    <span className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-400 dark:text-slate-700 leading-none">Filters</span>
+                </div>
+
+                <div className="space-y-8 px-1">
+                    {[
+                        { label: 'Time Range', value: filters?.timeRange || 'Last 24 Hours', key: 'timeRange', options: ['Last 1 Hour', 'Last 24 Hours', 'Last 7 Days', 'Last 30 Days'] },
+                        { label: 'Risk Level', value: filters?.riskLevel || 'All Levels', key: 'riskLevel', options: ['All Levels', 'Critical', 'High', 'Medium', 'Low'] },
+                        { label: 'Status', value: filters?.status || 'All', key: 'status', options: ['All', 'Interdicted', 'Allowed', 'Investigating'] }
+                    ].map((filter) => (
+                        <div key={filter.key} className="space-y-4 relative group">
+                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-600 ml-4 group-hover:text-blue-500 transition-colors">{filter.label}</label>
+                            <div className="relative">
+                                <select 
+                                    value={filter.value}
+                                    onChange={(e) => onFilterChange?.({ [filter.key]: e.target.value })}
+                                    className="w-full appearance-none px-6 py-5 text-[11px] font-black uppercase border-none rounded-2xl bg-white dark:bg-slate-950/80 text-slate-900 dark:text-slate-400 focus:ring-2 focus:ring-blue-600/10 transition-all cursor-pointer shadow-sm pr-12"
+                                >
+                                    {filter.options.map(opt => <option key={opt}>{opt}</option>)}
+                                </select>
+                                <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 dark:text-slate-700 pointer-events-none group-hover:text-blue-600 transition-colors" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {/* FOOTER */}
+        <div className="p-10 border-t border-slate-100 dark:border-slate-900 opacity-20 hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+            <Activity className="w-3 h-3 text-blue-600 animate-pulse" />
+            <span className="text-[9px] font-black uppercase text-slate-950 dark:text-white tracking-[0.4em]">FinShield_v4.0.2</span>
         </div>
       </div>
 
-      {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 bg-slate-950/10 z-50 lg:hidden backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
