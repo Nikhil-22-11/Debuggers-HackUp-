@@ -113,7 +113,3 @@ npm run dev
 
 ---
 
-## 👨‍💻 Team
-
-- Nayan Hemrajani  
-- (Add your teammates here)
